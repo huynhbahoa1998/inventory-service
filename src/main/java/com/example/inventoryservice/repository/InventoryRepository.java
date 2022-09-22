@@ -1,12 +1,17 @@
 package com.example.inventoryservice.repository;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.example.inventoryservice.model.Inventory;
-import com.example.inventoryservice.model.InventoryId;
-import org.socialsignin.spring.data.dynamodb.repository.EnableScan;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@EnableScan
-public interface InventoryRepository extends CrudRepository<Inventory, InventoryId> {
+public class InventoryRepository {
+
+    @Autowired
+    private DynamoDBMapper dynamoDBMapper;
+
+    public void createInventory(Inventory inventory) {
+        dynamoDBMapper.save(inventory);
+    }
 }

@@ -14,6 +14,6 @@ public class DynamoDBServiceImpl implements DynamoDBService {
 
     @Override
     public void createItem(Inventory inventory) {
-        inventoryRepository.save(inventory);
+        inventoryRepository.createInventory(inventory);
     }
 }
