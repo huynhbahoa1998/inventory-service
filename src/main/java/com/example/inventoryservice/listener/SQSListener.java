@@ -40,19 +40,21 @@ public class SQSListener {
 
     @SqsListener(value = "${cloud.aws.sqs.queue.name}", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
     public void receiveMessage(S3EventNotification s3EventNotification) {
-        S3EventNotification.S3Entity s3Entity = s3EventNotification.getRecords().get(0).getS3();
-        String objectKey = s3Entity.getObject().getKey();
+        if (s3EventNotification != null && s3EventNotification.getRecords() != null) {
+            S3EventNotification.S3Entity s3Entity = s3EventNotification.getRecords().get(0).getS3();
+            String objectKey = s3Entity.getObject().getKey();
 
-        try (S3Object s3object = s3Client.getObject(bucketName, objectKey);
-             InputStream inputStream = s3object.getObjectContent();
-             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-             BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
-            bufferedReader.lines().forEach(line -> {
-                String[] data = line.split(DELIMITER);
-                dynamoDBService.createItem(new Inventory(data[UUID_INDEX], data[BOOK_UUID_INDEX], Integer.parseInt(data[QUANTITY_INDEX])));
-            });
-        } catch (Exception e) {
-            log.error(e.getMessage());
+            try (S3Object s3object = s3Client.getObject(bucketName, objectKey);
+                 InputStream inputStream = s3object.getObjectContent();
+                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+                bufferedReader.lines().forEach(line -> {
+                    String[] data = line.split(DELIMITER);
+                    dynamoDBService.createItem(new Inventory(data[UUID_INDEX], data[BOOK_UUID_INDEX], Integer.parseInt(data[QUANTITY_INDEX])));
+                });
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
         }
     }
 }
